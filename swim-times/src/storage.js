@@ -19,7 +19,7 @@ export const Storage = {
    */
   getRecords: async () => {
     try {
-      const res = await fetch('/api/records');
+      const res = await fetch('api/records');
       if (!res.ok) throw new Error('Failed to fetch');
       return await res.json();
     } catch (err) {
@@ -50,7 +50,7 @@ export const Storage = {
         time
       };
 
-      const res = await fetch('/api/records', {
+      const res = await fetch('api/records', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -68,7 +68,7 @@ export const Storage = {
    */
   removeRecord: async (id) => {
     try {
-      await fetch(`/api/records/${id}`, { method: 'DELETE' });
+      await fetch(`api/records/${id}`, { method: 'DELETE' });
     } catch (err) {
       console.error(err);
     }

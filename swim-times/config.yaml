@@ -2,6 +2,7 @@ name: "Swim Times"
 version: "1.0.0"
 slug: "swim_times"
 description: "Track pool occupancy and best times."
+panel_icon: mdi:swim
 url: "https://github.com/dgaus/swim-times"
 startup: application
 arch:
@@ -30,7 +31,9 @@ options:
     saturday:
       open: "09:00"
       close: "20:00"
-    sunday: null
+    sunday:
+      open: "09:00"
+      close: "17:00"
   slot_duration_minutes: 30
 schema:
   schedule:
