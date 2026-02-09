@@ -1,10 +1,11 @@
 name: "Swim Times"
-version: "1.0.0"
+version: "0.0.1"
 slug: "swim_times"
 description: "Track pool occupancy and best times."
 panel_icon: mdi:swim
 url: "https://github.com/dgaus/swim-times"
 startup: application
+init: false
 arch:
   - aarch64
   - amd64

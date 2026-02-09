@@ -1,21 +1,28 @@
-FROM node:24-alpine AS builder
+ARG BUILD_FROM
+FROM $BUILD_FROM
+
+# Install dependencies
+RUN \
+    apk add --no-cache \
+    nodejs \
+    npm
+
+# Build application
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci
 COPY . .
-RUN npm run build
 
-FROM node:24-alpine
-WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/server.js .
-COPY --from=builder /app/package*.json .
-COPY --from=builder /app/run.sh .
+RUN \
+    npm ci && \
+    npm run build && \
+    npm ci --production
 
-RUN npm ci --production
-RUN chmod a+x run.sh
+RUN chmod a+x /app/run.sh
 
-# Home Assistant Add-on specific
-EXPOSE 3000
+LABEL \
+    io.hass.name="Swim Times" \
+    io.hass.description="Track pool occupancy and best times." \
+    io.hass.arch="aarch64|amd64|armv7" \
+    io.hass.type="addon" \
+    io.hass.version="0.0.1"
 
 CMD [ "./run.sh" ]
