@@ -6,7 +6,7 @@ import { UI } from './ui.js'
 document.querySelector('#app').innerHTML = `
   <div class="container">
     <header>
-      <h1>🏊 SwimTracker</h1>
+      <h1>SwimTimes 🏊</h1>
       <p>Pool Occupancy & Best Times</p>
     </header>
     
