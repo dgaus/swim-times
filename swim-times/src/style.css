@@ -80,11 +80,37 @@ button:hover {
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
+.data-actions {
+  margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  padding: 0.5rem 1rem;
+  font-size: 0.85rem;
+}
+
+#data-status {
+  margin-top: 0.6rem;
+  min-height: 1.2em;
+  font-size: 0.85rem;
+  opacity: 0.75;
+}
+
+#data-status.error {
+  color: #ff3b30;
+  opacity: 1;
+}
+
 /* GRID */
 .schedule-grid {
   display: grid;
-  grid-template-columns: 60px repeat(6, 1fr);
-  /* Time + 6 Days */
+  /* grid-template-columns is set inline by ui.js to match the number of configured day columns */
   gap: 1px;
   background-color: var(--grid-border);
   border: 1px solid var(--grid-border);

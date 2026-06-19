@@ -20,12 +20,18 @@ export const UI = {
         emptyHeader.className = 'grid-header empty';
         grid.appendChild(emptyHeader);
 
-        const dayIndices = [1, 2, 3, 4, 5, 6]; // Mon-Sat
+        // Display indices (0-7) present in the schedule, in render order.
+        // 0 = Sunday-first, 7 = Sunday-last; a plain numeric sort handles both.
+        const dayIndices = Object.keys(schedule).map(Number).sort((a, b) => a - b);
+
+        // Size the grid to the actual number of day columns (varies as days open/close),
+        // so the layout never wraps regardless of how many days are configured.
+        grid.style.gridTemplateColumns = `60px repeat(${dayIndices.length}, 1fr)`;
 
         dayIndices.forEach(dayIdx => {
             const dayHeader = document.createElement('div');
             dayHeader.className = 'grid-header';
-            dayHeader.textContent = SHORT_DAYS[dayIdx];
+            dayHeader.textContent = SHORT_DAYS[dayIdx % 7]; // 7 -> Sunday
             grid.appendChild(dayHeader);
         });
 
@@ -44,15 +50,16 @@ export const UI = {
             // Day Columns
             dayIndices.forEach(dayIdx => {
                 const slots = schedule[dayIdx];
+                const weekday = dayIdx % 7; // 7 -> Sunday; storage/stats always key on weekday 0-6
                 const cell = document.createElement('div');
                 cell.className = 'grid-cell';
 
                 // Check if day has this time
                 if (slots.includes(time)) {
-                    const key = `${dayIdx}-${time}`;
+                    const key = `${weekday}-${time}`;
                     const stat = stats[key];
 
-                    cell.dataset.day = dayIdx;
+                    cell.dataset.day = weekday;
                     cell.dataset.time = time;
 
                     if (stat && stat.count > 0) {
@@ -64,7 +71,7 @@ export const UI = {
                         cell.classList.add('empty-data');
                     }
 
-                    cell.addEventListener('click', () => onSlotClick(dayIdx, time));
+                    cell.addEventListener('click', () => onSlotClick(weekday, time));
                 } else {
                     cell.classList.add('unavailable');
                 }

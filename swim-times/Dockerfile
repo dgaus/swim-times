@@ -23,6 +23,6 @@ LABEL \
     io.hass.description="Track pool occupancy and best times." \
     io.hass.arch="aarch64|amd64|armv7" \
     io.hass.type="addon" \
-    io.hass.version="0.0.1"
+    io.hass.version="0.1.0"
 
 CMD [ "./run.sh" ]

@@ -1,5 +1,5 @@
 name: "Swim Times"
-version: "0.0.1"
+version: "0.1.0"
 slug: "swim_times"
 description: "Track pool occupancy and best times."
 panel_icon: mdi:swim
@@ -13,6 +13,7 @@ arch:
 map:
   - config:rw
 options:
+  week_starts_on: monday
   schedule:
     monday:
       open: "08:00"
@@ -37,6 +38,7 @@ options:
       close: "17:00"
   slot_duration_minutes: 30
 schema:
+  week_starts_on: "list(monday|sunday)?"
   schedule:
     monday:
       open: str?

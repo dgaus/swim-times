@@ -1,100 +1,100 @@
 # SwimTimes
 
-100% vibe coded, including this readme, take everything with a grain of salt.
+100% vibe coded, including this readme — take everything with a grain of salt.
 
-Track pool occupancy and find the best times to swim. SwimTimes lets you record and visualize pool crowding patterns throughout the week so you can plan your sessions when the pool is less busy.
+Track pool occupancy and find the best times to swim. Record how crowded each time slot is and
+SwimTimes renders a weekly heatmap so you can plan around the crowds. Ships as a Home Assistant add-on.
 
 ![SwimTimes Screenshot](docs/screenshot.png)
 
 ## Features
 
-- **Weekly heatmap** showing average occupancy for each time slot
-- **1–5 rating scale** (1 = Empty, 5 = Full)
-- **Daily statistics** — quietest time, busiest time, and average occupancy
-- **"Track right now" button** for quick recording based on the current day/time
-- **Rating history** — view and delete individual ratings per slot
-- **Persistent JSON storage** that survives restarts
-- **Light/dark theme** based on system preference
-- **Responsive** — works on desktop and mobile
+- Weekly occupancy heatmap with a 1–5 rating scale (1 = Empty, 5 = Full)
+- Daily stats: quietest time, busiest time, average occupancy
+- "Track right now" for one-tap recording of the current slot
+- Per-slot rating history (view and delete)
+- Export / import all data as JSON, for backups or moving between instances
+- Configurable schedule, slot duration, and week start
+- Light/dark theme, responsive layout
+- Persistent JSON storage — no database
 
 ## Installation
 
-### Home Assistant Add-on
+### Home Assistant add-on
 
-1. In Home Assistant, go to **Settings > Add-ons > Add-on Store**.
-2. Open the **⋮** menu, select **Repositories**, and add: `https://github.com/dgaus/swim-times`
-3. Find **Swim Times** in the store and click **Install**.
-4. Click **Start**. Optionally enable **Start on boot** and **Watchdog**.
-5. Click **Open Web UI** or visit `http://homeassistant.local:3000`.
+1. In Home Assistant: **Settings > Add-ons > Add-on Store**.
+2. From the **⋮** menu choose **Repositories** and add `https://github.com/dgaus/swim-times`.
+3. Install **Swim Times**, then **Start** (optionally enable Start on boot / Watchdog).
+4. Open the Web UI.
 
-Data is stored in `/data/swim_db.json` and persists across restarts and updates.
-
-You can configure the pool schedule and slot duration in the add-on's **Configuration** tab (defaults: Mon–Fri 08:00–22:00, Sat 09:00–20:00, Sun 09:00–17:00, 30-minute slots).
+Data lives in `/data/swim_db.json` and persists across restarts and updates. Configure the schedule,
+slot duration, and week start in the **Configuration** tab (see below).
 
 ### Standalone Docker
 
-The Dockerfile is inside the `swim-times/` directory and uses the Home Assistant `BUILD_FROM` argument. To build standalone, supply a base image:
+The Dockerfile uses the Home Assistant `BUILD_FROM` argument, so pass a base image:
 
 ```bash
 docker build --build-arg BUILD_FROM=node:20-alpine -t swim-times ./swim-times
-
-docker run -d \
-  --name swim-times \
-  -p 3000:3000 \
-  -v $(pwd)/data:/app/data \
-  --restart unless-stopped \
-  swim-times
+docker run -d --name swim-times -p 3000:3000 -v $(pwd)/data:/app/data --restart unless-stopped swim-times
 ```
 
 Open `http://localhost:3000`.
 
 ### Development
 
-All npm commands run from the `swim-times/` directory:
+Run from the inner `swim-times/` directory:
 
 ```bash
 cd swim-times
 npm install
-npm run dev
-```
-
-This starts the Vite dev server on port 5173 and the API server on port 3000. The Vite proxy forwards `/api` requests to the backend.
-
-To build for production:
-
-```bash
-npm run build
-npm start
+npm run dev    # Vite client on :5173, API on :3000 (/api proxied)
+npm run build  # production build to dist/
+npm start      # serve dist/ + API on :3000
 ```
 
 ## Usage
 
-1. **Click a time slot** in the weekly grid.
-2. **Pick a rating** from 1 (Empty) to 5 (Full).
-3. The heatmap updates immediately — green means low occupancy, red means high.
-4. Use **"Track right now"** to record the current pool occupancy without picking a slot manually.
-5. Statistics cards at the top show today's **Quiet Time**, **Busy Time**, and **Average Occupancy**.
-
-Striped cells indicate the pool is closed for that time slot.
+- Click a slot and pick 1 (Empty) to 5 (Full); the heatmap updates immediately (green = quiet,
+  red = busy).
+- "Track right now" records the current slot without picking one manually.
+- Stat cards show today's quiet time, busy time, and average occupancy.
+- Striped cells mark times the pool is closed.
+- Use Export / Import to back up your data or move it to another instance.
 
 ## Configuration
+
+### Environment variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `PORT` | `3000` | Server port |
-| `DATA_DIR` | `./data` | Directory for `swim_db.json` and `schedule_config.json` |
+| `DATA_DIR` | `./data` | Holds `swim_db.json` (and `options.json` under Home Assistant) |
 
-The pool schedule can be customized via `schedule_config.json` in the data directory (or through the Home Assistant add-on configuration). Each day uses numeric keys (0 = Sunday, 6 = Saturday) with `open`/`close` times, plus a `slotDurationMinutes` value.
+### Schedule (Home Assistant)
+
+Set in the add-on's **Configuration** tab. Home Assistant writes these to `DATA_DIR/options.json`,
+which the server reads on startup:
+
+| Option | Default | Description |
+|--------|---------|-------------|
+| `schedule` | Mon–Fri 08:00–22:00, Sat 09:00–20:00, Sun 09:00–17:00 | Per-day `open`/`close`; leave a day blank to close it |
+| `slot_duration_minutes` | `30` | Slot length |
+| `week_starts_on` | `monday` | `monday` puts Sunday last, `sunday` puts it first |
+
+Outside Home Assistant there is no config file and the built-in defaults apply. Changes take effect
+on restart. Existing ratings are re-bucketed into the new slots, so changing the slot duration never
+loses data.
 
 ## Architecture
 
-- **Frontend**: Vanilla JS, built with Vite
-- **Backend**: Express.js (v5) serving a REST API and static files
-- **Storage**: JSON file (`swim_db.json`) — no database required
-- **Deployment**: Docker (Alpine + Node.js)
+- Frontend: vanilla JS, built with Vite
+- Backend: Express 5 REST API serving the built client
+- Storage: a single JSON file (`swim_db.json`) — no database
+- Deployment: Docker (Alpine + Node)
 
 ## Troubleshooting
 
-- **Data not persisting**: Check that the volume mount or data directory is writable.
-- **Server won't start**: Make sure port 3000 is free. Check logs via `docker logs swim-times` or the Home Assistant add-on log tab.
-- **Corrupted data file**: The server automatically backs up corrupted JSON files and recreates them.
+- **Data not persisting**: ensure the volume / data directory is writable.
+- **Server won't start**: free port 3000; check `docker logs swim-times` or the add-on log tab.
+- **Corrupted data file**: the server backs up and recreates invalid JSON automatically.

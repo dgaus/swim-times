@@ -29,6 +29,21 @@ export const Storage = {
   },
 
   /**
+   * getConfig - fetch the schedule/slot-duration config from the server
+   * @returns {Promise<Object|null>} canonical config, or null on error (caller falls back to defaults)
+   */
+  getConfig: async () => {
+    try {
+      const res = await fetch('api/config');
+      if (!res.ok) throw new Error('Failed to fetch config');
+      return await res.json();
+    } catch (err) {
+      console.error(err);
+      return null;
+    }
+  },
+
+  /**
    * addRecord
    * @param {number} rating 
    * @param {number} day - Day of week (0-6)
@@ -60,6 +75,21 @@ export const Storage = {
     } catch (err) {
       console.error(err);
     }
+  },
+
+  /**
+   * importRecords - bulk-load records (merged by id on the server)
+   * @param {Array} records
+   * @returns {Promise<{imported:number, skipped:number, total:number}>}
+   */
+  importRecords: async (records) => {
+    const res = await fetch('api/records/import', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(records)
+    });
+    if (!res.ok) throw new Error('Import failed');
+    return await res.json();
   },
 
   /**
